@@ -76,10 +76,6 @@
             <el-button type="primary" @click="enterpriseFormDialogFormVisible('form')">确 定</el-button>
           </el-form-item>
         </el-form>
-        <!--<div slot="footer" class="dialog-footer">
-          <el-button @click="dialogFormVisible = false">取 消</el-button>
-          <el-button type="primary" @click="dialogFormVisible = false">确 定</el-button>
-        </div>-->
       </el-dialog>
     </div>
     <!--显示企业相应的点位信息以供选择-->
@@ -135,10 +131,11 @@
                 class="upload-demo"
                 action="http://localhost:7000/save/photo"
                 :on-preview="handlePreview"
+                :on-success="function (response, file, fileList) {return handleSuccess(response, file, fileList, item.photo)}"
                 :on-remove="handleRemove"
                 :file-list="fileList"
                 list-type="picture">
-                <el-button size="small" type="primary">点击上传</el-button>
+                <el-button size="small" type="primary">图片上传</el-button>
               </el-upload>
             </div>
           </el-checkbox-group>
@@ -156,6 +153,9 @@
 export default {
   data () {
     return {
+      enterpriseId: '',
+      checkBoxData: [],
+      influenceFactorDetails: [],
       fileList: [],
       // 复选框表单
       checkBoxForm: {
@@ -214,11 +214,37 @@ export default {
   mounted () {
     this.getAllFormWork()
   },
+  watch: {
+  },
   methods: {
     // 保存风险因素情况
-    upInsertInfluenceFactorDialogFormVisible (formName) {
-      this.insertInfluenceFactorDialogFormVisible = false
-      console.log(this.checkBoxForm.type)
+    async upInsertInfluenceFactorDialogFormVisible (formName) {
+      // 遍历选中的复选框用来和图片封装的图片对象进行比较奥
+      if (this.checkBoxForm.type.length > 0) {
+        this.checkBoxForm.type.forEach((item, index) => {
+          // 拼接选中的图片地址
+          let photoStr = ''
+          this.checkBoxData.forEach((photoItem, photoIndex) => {
+            // 如果选中的复选框和图片对象的名称一样则进行拼装
+            if (item + '图片' === photoItem.determineFactor) {
+              photoStr = photoItem.photo + ',' + photoStr
+            }
+          })
+          // 把拼装好的图片地址的最后一个逗号去掉
+          if (photoStr.length > 0) photoStr = photoStr.substr(0, photoStr.length - 1)
+          // 把风险详情添加到数组里
+          this.influenceFactorDetails.push({enterpriseId: this.enterpriseId, categoryId: this.checkBoxForm.list.categoryId, determineFactor: item, photo: photoStr})
+        })
+        // 把风险详情添加到数组里发送给后台
+        const {data: res} = await this.$http.post('/save/influence/factor/details', {
+          influenceFactorDetailsList: this.influenceFactorDetails
+        })
+        console.log(res)
+        this.insertInfluenceFactorDialogFormVisible = false
+      } else {
+        this.$message.error('请选择后在提交！')
+        return false
+      }
     },
     // 企业信息录入
     enterpriseFormDialogFormVisible (formName) {
@@ -241,6 +267,8 @@ export default {
           })
           if (res.result === 'SUCCESS') {
             this.$message.success('保存成功')
+            // 保存返回的企业id
+            this.enterpriseId = res.data
             // 把table的编辑按钮解禁
             this.tableIsDistable = false
             this.dialogFormVisible = false
@@ -253,8 +281,17 @@ export default {
         }
       })
     },
+    handleSuccess (response, file, fileList, photo) {
+      // 把上传的图片通过对象封装起来加进数组
+      this.checkBoxData.push({determineFactor: photo, photo: response.data})
+    },
     handleRemove (file, fileList) {
-      console.log(file, fileList)
+      // 通过删除的地址和对象的地址进行比较，通过下标进行删除
+      this.checkBoxData.forEach((item, index) => {
+        if (file.response.data === item.photo) {
+          this.checkBoxData.splice(index, 1)
+        }
+      })
     },
     handlePreview (file) {
       console.log(file)
@@ -271,7 +308,6 @@ export default {
     handleEdit (index, row) {
       this.insertInfluenceFactorDialogFormVisible = true
       this.checkBoxForm.list = row
-      console.log(index, row)
     },
     handleDelete (index, row) {
       console.log(index, row)
