@@ -2,6 +2,7 @@
   <div>
     <!--显示已选择的模板-->
     <div class="enterprise-css">
+      <div>
       <el-select v-model="formWorkForm.region" disabled placeholder="模板" style="width: 350px">
         <el-option
           v-for="item in options"
@@ -13,6 +14,24 @@
       <!-- Form -->
       <!--企业信息录入-->
       <el-button type="primary" @click="upDialogFormVisible">企业信息录入</el-button>
+      </div>
+      <div class="upload-button">
+      <el-upload
+        class="my-upload-demo"
+        ref="upload"
+        action="http://localhost:7000/save/photo"
+        :on-preview="wordHandlePreview"
+        :on-remove="wordHandleRemove"
+        :on-success="wordHandleSuccess"
+        :limit="1"
+        :on-exceed="wordHandleExceed"
+        :auto-upload="false"
+        :file-list="wordFileList">
+        <el-button slot="trigger" type="primary" >选择word文件</el-button>
+        <el-button type="success" @click="submitUpload" :disabled="wordButtonIsDisabled">上传<i class="el-icon-upload el-icon--right"></i></el-button>
+      </el-upload>
+      </div>
+    </div>
       <el-dialog title="企业信息" :visible.sync="dialogFormVisible">
         <!--选择企业对应录入模板-->
         <el-form :model="formWorkForm" :disabled="formWorkForm.isDisabled" ref="formWorkForm" :rules="rules"
@@ -77,7 +96,6 @@
           </el-form-item>
         </el-form>
       </el-dialog>
-    </div>
     <!--显示企业相应的点位信息以供选择-->
     <el-table
       :data="tableData"
@@ -86,7 +104,8 @@
         label="企业类型"
         width="300">
         <template slot-scope="scope">
-          <i class="el-icon-time"></i>
+          <i class="el-icon-success" v-if="upGreen.indexOf(scope.$index) !== -1" style="color: #67C23A"></i>
+          <i class="el-icon-success" v-else ></i>
           <span style="margin-left: 10px">{{ scope.row.tableName }}</span>
         </template>
       </el-table-column>
@@ -111,12 +130,12 @@
           <el-button
             size="mini"
             :disabled="tableIsDistable"
-            @click="handleEdit(scope.$index, scope.row)">编辑
+            @click="handleEdit(scope.$index, scope.row)">录入
           </el-button>
           <el-button
             size="mini"
             type="danger"
-            @click="handleDelete(scope.$index, scope.row)">删除
+            @click="handleDelete(scope.$index, scope.row)">修改
           </el-button>
         </template>
       </el-table-column>
@@ -141,7 +160,7 @@
           </el-checkbox-group>
         </el-form-item>
         <el-form-item>
-          <el-button @click="insertInfluenceFactorDialogFormVisible = false">取 消</el-button>
+          <el-button @click="downInsertInfluenceFactorDialogFormVisible">取 消</el-button>
           <el-button type="primary" @click="upInsertInfluenceFactorDialogFormVisible('checkBoxForm')">确 定</el-button>
         </el-form-item>
       </el-form>
@@ -153,10 +172,15 @@
 export default {
   data () {
     return {
+      // word文件上传
+      wordButtonIsDisabled: true,
+      wordFileList: [],
+      upGreen: [],
       enterpriseId: '',
       checkBoxData: [],
       influenceFactorDetails: [],
       fileList: [],
+      indexNumber: '',
       // 复选框表单
       checkBoxForm: {
         checkList: [],
@@ -217,11 +241,46 @@ export default {
   watch: {
   },
   methods: {
+    // word文档上春
+    async wordHandleSuccess (response) {
+      if (response.result === 'SUCCESS') {
+        const {data: res} = await this.$http.post('/save/word/url', {
+          enterpriseId: this.enterpriseId,
+          wordUrl: response.data
+        })
+        if (res.result === 'SUCCESS') {
+          this.$message.success('上传成功')
+        } else {
+          this.$message.error('上传失败！请重新上传')
+        }
+      } else {
+        this.$message.error('上传失败！请重新上传')
+      }
+    },
+    submitUpload () {
+      this.$refs.upload.submit()
+    },
+    wordHandlePreview (file) {
+      console.log(file)
+    },
+    wordHandleRemove (file, fileList) {
+      console.log(file, fileList)
+    },
+    wordHandleExceed (files, fileList) {
+      this.$message.warning(`当前限制选择 1 个文件，本次选择了 ${files.length} 个文件，共选择了 ${files.length + fileList.length} 个文件`)
+    },
     // 保存风险因素情况
     async upInsertInfluenceFactorDialogFormVisible (formName) {
       // 遍历选中的复选框用来和图片封装的图片对象进行比较奥
       if (this.checkBoxForm.type.length > 0) {
         this.checkBoxForm.type.forEach((item, index) => {
+          // 获取相应的分数
+          let score = ''
+          this.checkBoxForm.list.tableDetailsList.forEach((scoreItem, socreIndex) => {
+            if (item === scoreItem.determineFactor) {
+              score = scoreItem.score
+            }
+          })
           // 拼接选中的图片地址
           let photoStr = ''
           this.checkBoxData.forEach((photoItem, photoIndex) => {
@@ -233,18 +292,42 @@ export default {
           // 把拼装好的图片地址的最后一个逗号去掉
           if (photoStr.length > 0) photoStr = photoStr.substr(0, photoStr.length - 1)
           // 把风险详情添加到数组里
-          this.influenceFactorDetails.push({enterpriseId: this.enterpriseId, categoryId: this.checkBoxForm.list.categoryId, determineFactor: item, photo: photoStr})
+          this.influenceFactorDetails.push({'enterpriseId': this.enterpriseId, 'categoryId': this.checkBoxForm.list.categoryId, 'determineFactor': item, 'score': score, 'photo': photoStr})
         })
+        console.log(this.influenceFactorDetails)
         // 把风险详情添加到数组里发送给后台
         const {data: res} = await this.$http.post('/save/influence/factor/details', {
-          influenceFactorDetailsList: this.influenceFactorDetails
+          'influenceFactorDetailsList': this.influenceFactorDetails
         })
-        console.log(res)
-        this.insertInfluenceFactorDialogFormVisible = false
+        if (res.result === 'SUCCESS') {
+          this.$message.success('录入成功！')
+          // 上传后的数组置空
+          this.influenceFactorDetails = []
+          // 把图片上传成功的数组置空
+          this.checkBoxData = []
+          this.fileList = []
+          // 把选中中的数组置空
+          this.checkBoxForm.type = []
+          // 把table行号加进数组
+          this.upGreen.push(this.indexNumber)
+          // 关闭弹窗
+          this.insertInfluenceFactorDialogFormVisible = false
+        } else {
+          this.$message.error('录入失败！请重新录入！')
+        }
       } else {
         this.$message.error('请选择后在提交！')
         return false
       }
+    },
+    // 选项取消按钮
+    downInsertInfluenceFactorDialogFormVisible () {
+      // 把图片上传成功的数组置空
+      this.checkBoxData = []
+      this.fileList = []
+      // 把选中中的数组置空
+      this.checkBoxForm.type = []
+      this.insertInfluenceFactorDialogFormVisible = false
     },
     // 企业信息录入
     enterpriseFormDialogFormVisible (formName) {
@@ -272,6 +355,8 @@ export default {
             // 把table的编辑按钮解禁
             this.tableIsDistable = false
             this.dialogFormVisible = false
+            // 把上传文件的按钮打开
+            this.wordButtonIsDisabled = false
           } else {
             this.$message.error('保存失败，请重试')
           }
@@ -308,6 +393,7 @@ export default {
     handleEdit (index, row) {
       this.insertInfluenceFactorDialogFormVisible = true
       this.checkBoxForm.list = row
+      this.indexNumber = index
     },
     handleDelete (index, row) {
       console.log(index, row)
@@ -339,6 +425,10 @@ export default {
               this.form.isDisabled = false
               // 把模板选择设为禁用状态
               // this.formWorkForm.isDisabled = true
+              // 把选中的并成功上传的table index置空
+              this.upGreen = []
+              // 把已经成功上传的文档置空
+              this.wordFileList = []
             } else {
               this.$message({
                 type: 'error',
@@ -371,7 +461,8 @@ export default {
 
 <style scoped>
 .enterprise-css{
-  float: left;
+  display: flex;
+  justify-content: space-between;
 }
 .select-button{
 display: flex;
@@ -379,5 +470,11 @@ display: flex;
 .checkbox-upload{
   display: flex;
   justify-content: space-between;
+}
+.my-upload-demo{
+  margin-right: 8px;
+}
+.upload-button{
+  display: flex;
 }
 </style>
