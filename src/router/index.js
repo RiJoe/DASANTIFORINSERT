@@ -1,26 +1,23 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import Test from '../components/Test'
 import Home from '../components/Home'
-import InputEnterpriseMessage from '../components/enterpriseInput/InputEnterpriseMessage'
-import InputEnterpriseRiskMessage from '../components/enterpriseInput/InputEnterpriseRiskMessage'
 import TableInsert from '../components/tableInsert/TableInsert'
-import Possibility from '../components/tableInsert/Possibility'
 import InsertEnterpriseDetails from '../components/enterpriseInput/InsertEnterpriseDetails'
+import Login from '../components/Login'
 
 Vue.use(Router)
 
-export default new Router({
+const router = new Router({
   routes: [
     {
       path: '/',
-      name: 'Home',
-      component: Home
+      name: 'Login',
+      component: Login
     },
     {
-      path: '/test',
-      name: 'Test',
-      component: Test
+      path: '/login',
+      name: 'Login',
+      component: Login
     },
     {
       path: '/home',
@@ -29,20 +26,8 @@ export default new Router({
       redirect: '/insertEnterpriseDetails',
       children: [
         {
-          path: '/input',
-          component: InputEnterpriseMessage
-        },
-        {
-          path: '/inputriskmessage',
-          component: InputEnterpriseRiskMessage
-        },
-        {
           path: '/tableinsert',
           component: TableInsert
-        },
-        {
-          path: '/possibility',
-          component: Possibility
         },
         {
           path: '/insertEnterpriseDetails',
@@ -52,3 +37,10 @@ export default new Router({
     }
   ]
 })
+router.beforeEach((to, from, next) => {
+  if (to.path === '/login') return next()
+  const userId = window.sessionStorage.getItem('userId')
+  if (!userId) return next('/login')
+  next()
+})
+export default router

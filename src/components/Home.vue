@@ -2,7 +2,7 @@
   <el-container>
     <el-header>
       <div class="home-header">
-        <img src="../assets/logo.png" alt="" @click="imageToHome">
+        <img src="../assets/003.jpg" alt="" @click="imageToHome">
         企业风险录入系统
       </div>
       <div>
@@ -37,11 +37,11 @@ export default {
   },
   methods: {
     imageToHome () {
-      // this.$router.replace('/home')
+      this.$router.replace('/home')
     },
     logOut () {
-      // window.sessionStorage.removeItem('userId')
-      // this.$router.push('/login')
+      window.sessionStorage.removeItem('userId')
+      this.$router.push('/login')
     }
   }
 }

@@ -156,7 +156,7 @@ export default {
       this.$confirm('确认关闭？')
         .then(_ => {
           done()
-          this.$router.push({path: '/inputriskmessage'})
+          this.$router.push({path: '/home'})
         })
         .catch(_ => {
         })
@@ -164,7 +164,7 @@ export default {
     // 取消弹框，调准到指定页面
     downDialogFormVisible () {
       this.dialogFormVisible = false
-      this.$router.push({path: '/inputriskmessage'})
+      this.$router.push({path: '/home'})
     },
     // 保存模板名称
     upDialogFormVisible (formName) {
