@@ -7,6 +7,7 @@ import App from './App'
 import router from './router'
 import 'element-ui/lib/theme-chalk/index.css'
 import axios from 'axios'
+import BaiduMap from 'vue-baidu-map'
 
 Vue.use(Button, Container, Header, Aside, Main, MenuItem, Menu)
 Vue.use(Container)
@@ -35,6 +36,9 @@ Vue.use(Popover)
 Vue.use(Tag)
 Vue.prototype.$message = Message
 Vue.prototype.$confirm = MessageBox.confirm
+Vue.use(BaiduMap, {
+  ak: 'wFQlNo1lSDLEx8RV6vehHiwLKlx23GNg'
+})
 
 Vue.config.productionTip = false
 

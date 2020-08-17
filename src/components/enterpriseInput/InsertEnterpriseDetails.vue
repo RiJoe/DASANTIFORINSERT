@@ -103,7 +103,7 @@
       style="width: 100%">
       <el-table-column
         label="企业类型"
-        width="300">
+        width="350">
         <template slot-scope="scope">
           <i class="el-icon-success" v-if="upGreen.indexOf(scope.$index) !== -1" style="color: #67C23A"></i>
           <i class="el-icon-success" v-else ></i>
@@ -275,7 +275,7 @@ export default {
       },
       otherTableData: [],
       // word文件上传
-      wordButtonIsDisabled: true,
+      wordButtonIsDisabled: false,
       wordFileList: [],
       upGreen: [],
       enterpriseId: '',
@@ -297,7 +297,7 @@ export default {
         isDisabled: false
       },
       tableData: [],
-      tableIsDistable: true,
+      tableIsDistable: false,
       dialogFormVisible: false,
       // 企业信息表单
       form: {
@@ -423,7 +423,14 @@ export default {
       }
     },
     submitUpload () {
-      this.$refs.upload.submit()
+      if (this.enterpriseId !== '') {
+        this.$refs.upload.submit()
+        if (this.wordFileList.length > 0) {
+          this.$message.warning('相应文档已上传！')
+        }
+      } else {
+        this.$message.error('请录入企业信息后再上传')
+      }
     },
     wordHandlePreview (file) {
       console.log(file)
@@ -432,7 +439,7 @@ export default {
       console.log(file, fileList)
     },
     wordHandleExceed (files, fileList) {
-      this.$message.warning(`当前限制选择 1 个文件，本次选择了 ${files.length} 个文件，共选择了 ${files.length + fileList.length} 个文件`)
+      this.$message.warning(`每家企业只能选择 1 个文件，本次选择了 ${files.length} 个文件，共选择了 ${files.length + fileList.length} 个文件`)
     },
     // 保存风险因素情况
     async upInsertInfluenceFactorDialogFormVisible () {
@@ -555,6 +562,10 @@ export default {
       this.form.isDisabled = true
     },
     handleEdit (index, row) {
+      if (this.upGreen.indexOf(index) !== -1) {
+        this.$message.warning('选项只能入录一次！该选项已被录入！')
+        return false
+      }
       if (this.enterpriseId !== '') {
         this.insertInfluenceFactorDialogFormVisible = true
         this.checkBoxForm.list = row
