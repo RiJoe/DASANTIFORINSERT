@@ -2,7 +2,7 @@
 // (runtime-only or standalone) has been set in webpack.base.conf with an alias.
 import Vue from 'vue'
 import './assets/css/global.css'
-import {Button, Container, Header, Aside, Main, MenuItem, Menu, Checkbox, CheckboxGroup, Steps, Step, Upload, Form, FormItem, Input, Row, Col, Select, Option, Dialog, Card, Message, MessageBox, Table, TableColumn, Popover, Tag} from 'element-ui'
+import {Button, Container, Header, Aside, Main, MenuItem, Menu, Checkbox, CheckboxGroup, Steps, Step, Upload, Form, FormItem, Input, Row, Col, Select, Option, Dialog, Card, Message, MessageBox, Table, TableColumn, Popover, Tag, Loading, Carousel, CarouselItem, Progress} from 'element-ui'
 import App from './App'
 import router from './router'
 import 'element-ui/lib/theme-chalk/index.css'
@@ -34,6 +34,11 @@ Vue.use(Table)
 Vue.use(TableColumn)
 Vue.use(Popover)
 Vue.use(Tag)
+Vue.use(Loading)
+Vue.use(Carousel)
+Vue.use(CarouselItem)
+Vue.use(Progress)
+
 Vue.prototype.$message = Message
 Vue.prototype.$confirm = MessageBox.confirm
 Vue.use(BaiduMap, {

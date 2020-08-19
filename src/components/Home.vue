@@ -11,7 +11,10 @@
     </el-header>
     <el-container>
       <el-aside width="200px">
-        <el-menu router>
+        <el-menu router><el-menu-item index="/enterpriseInformation">
+          <i class="el-icon-s-data"></i>
+          <span slot="title">企业信息分析</span>
+        </el-menu-item>
           <el-menu-item index="/enterpriseDistributionMap">
             <i class="el-icon-location"></i>
             <span slot="title">企业地图分布</span>
