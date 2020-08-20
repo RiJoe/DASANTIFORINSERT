@@ -6,6 +6,7 @@ import InsertEnterpriseDetails from '../components/enterpriseInput/InsertEnterpr
 import Login from '../components/Login'
 import EnterpriseDistributionMap from '../components/riskDistributionMap/EnterpriseDistributionMap'
 import EnterpriseInformation from '../components/enterpriseInformation/EnterpriseInformation'
+import EnterpriseRiskDetails from '../components/enterpriseInformation/EnterpriseRiskDetails'
 
 Vue.use(Router)
 
@@ -42,6 +43,10 @@ const router = new Router({
         {
           path: '/enterpriseInformation',
           component: EnterpriseInformation
+        },
+        {
+          path: '/enterpriseRiskDetails',
+          component: EnterpriseRiskDetails
         }
       ]
     }

@@ -5,7 +5,7 @@
       <el-card class="box-card">
         <div slot="header" class="clearfix">
           <span>重大风险数量</span>
-          <el-button style="float: right; padding: 3px 0" type="text">企业详情</el-button>
+          <el-button style="float: right; padding: 3px 0" type="primary" size="medium" @click="majorDetails">企业详情</el-button>
         </div>
         <el-row>
           <el-col :span="24">
@@ -25,7 +25,7 @@
       <el-card class="box-card">
         <div slot="header" class="clearfix">
           <span>较大风险数量</span>
-          <el-button style="float: right; padding: 3px 0" type="text">企业详情</el-button>
+          <el-button style="float: right; padding: 3px 0" type="primary" size="medium" @click="largerDetails">企业详情</el-button>
         </div>
         <el-row>
           <el-col :span="24">
@@ -45,7 +45,7 @@
       <el-card class="box-card">
         <div slot="header" class="clearfix">
           <span>一般风险数量</span>
-          <el-button style="float: right; padding: 3px 0" type="text">企业详情</el-button>
+          <el-button style="float: right; padding: 3px 0" type="primary" size="medium" @click="generalDetails">企业详情</el-button>
         </div>
         <el-row>
           <el-col :span="24">
@@ -65,7 +65,7 @@
       <el-card class="box-card">
         <div slot="header" class="clearfix">
           <span>低风险数量</span>
-          <el-button style="float: right; padding: 3px 0" type="text">企业详情</el-button>
+          <el-button style="float: right; padding: 3px 0" type="primary" size="medium" @click="lowDetails">企业详情</el-button>
         </div>
         <el-row>
           <el-col :span="24">
@@ -132,6 +132,18 @@ export default {
     this.drawRadar()
   },
   methods: {
+    majorDetails () {
+      this.$router.push({path: '/enterpriseRiskDetails', query: {riskLevel: '重大风险'}})
+    },
+    largerDetails () {
+      this.$router.push({path: '/enterpriseRiskDetails', query: {riskLevel: '较大风险'}})
+    },
+    generalDetails () {
+      this.$router.push({path: '/enterpriseRiskDetails', query: {riskLevel: '一般风险'}})
+    },
+    lowDetails () {
+      this.$router.push({path: '/enterpriseRiskDetails', query: {riskLevel: '低风险'}})
+    },
     // 企业各风险数量情况
     async getEnterpriseRiskCount () {
       const {data: res} = await this.$http.get('/get/enterprise/risk/count')
@@ -349,7 +361,7 @@ export default {
     height: 100%
   }
   .el-row {
-    margin-bottom: 3px;
+    margin-bottom: 1px;
   }
   .el-carousel__item h3 {
     color: #475669;
