@@ -7,6 +7,8 @@ import Login from '../components/Login'
 import EnterpriseDistributionMap from '../components/riskDistributionMap/EnterpriseDistributionMap'
 import EnterpriseInformation from '../components/enterpriseInformation/EnterpriseInformation'
 import EnterpriseRiskDetails from '../components/enterpriseInformation/EnterpriseRiskDetails'
+import EnterpriseTableDetails from '../components/enterpriseInformation/EnterpriseTableDetails'
+import OtherEnterpriseRiskDetails from '../components/enterpriseInformation/OtherEnterpriseRiskDetails'
 
 Vue.use(Router)
 
@@ -26,7 +28,7 @@ const router = new Router({
       path: '/home',
       name: 'Home',
       component: Home,
-      redirect: '/insertEnterpriseDetails',
+      redirect: '/enterpriseInformation',
       children: [
         {
           path: '/tableinsert',
@@ -47,6 +49,14 @@ const router = new Router({
         {
           path: '/enterpriseRiskDetails',
           component: EnterpriseRiskDetails
+        },
+        {
+          path: '/enterpriseTableDetails',
+          component: EnterpriseTableDetails
+        },
+        {
+          path: '/otherEnterpriseRiskDetails',
+          component: OtherEnterpriseRiskDetails
         }
       ]
     }

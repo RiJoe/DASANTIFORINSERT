@@ -2,7 +2,7 @@
   <baidu-map class="map" :center="center" :zoom="zoom" @ready="handler" v-loading="loading" element-loading-text="加载中..." element-loading-spinner="el-icon-loading" element-loading-background="rgba(0, 0, 0, 0.8)">
     <bm-navigation anchor="BMAP_ANCHOR_TOP_RIGHT"></bm-navigation>
     <bm-geolocation anchor="BMAP_ANCHOR_BOTTOM_RIGHT" :showAddressBar="true" :autoLocation="true"></bm-geolocation>
-    <bm-marker :position="{lng:parseFloat(item.lng),lat:parseFloat(item.lat)}" :icon="{url: item.riskDeterminationTable.iconUrl,size: {width: 30, height: 30}}" @click="infoWindowOpen(item)" v-for="( item, index ) in this.enterpriseList" :key="index">
+    <bm-marker :position="{lng:parseFloat(item.lng),lat:parseFloat(item.lat)}" :title="item.companyName" :icon="{url: item.riskDeterminationTable.iconUrl,size: {width: 30, height: 30}}" @click="infoWindowOpen(item)" v-for="( item, index ) in this.enterpriseList" :key="index">
     </bm-marker>
     <bm-info-window :position="position" :show="show" :title="enterpriseInfo.companyName" @close="infoWindowClose" @open="myInfoWindowOpen"  >
       <ul>

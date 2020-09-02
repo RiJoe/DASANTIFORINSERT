@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div style="background-color: white; height: 99.5%; margin: 1px">
     <!--显示已选择的模板-->
     <div class="enterprise-css">
       <div>
@@ -13,7 +13,8 @@
       </el-select>
       <!-- Form -->
       <!--企业信息录入-->
-      <el-button type="primary" @click="upDialogFormVisible">企业信息录入</el-button>
+      <el-button type="success" @click="upDialogFormVisible">企业信息录入</el-button>
+      <el-button type="info" @click="upOtherDialogFormVisible">其他企业录入</el-button>
       </div>
       <div class="upload-button">
       <el-upload
@@ -28,7 +29,8 @@
         :auto-upload="false"
         :file-list="wordFileList">
         <el-button slot="trigger" type="primary" >选择文件</el-button>
-        <el-button type="success" @click="submitUpload" :disabled="wordButtonIsDisabled">上传<i class="el-icon-upload el-icon--right"></i></el-button>
+        <el-button v-if="enterpriseId !== ''" type="success" @click="submitUpload" :disabled="wordButtonIsDisabled">上传<i class="el-icon-upload el-icon--right"></i></el-button>
+        <el-button v-if="otherEnterpriseId !== ''" type="info" @click="otherSubmitUpload" :disabled="wordButtonIsDisabled">上传<i class="el-icon-upload el-icon--right"></i></el-button>
       </el-upload>
       </div>
     </div>
@@ -98,7 +100,8 @@
       </el-dialog>
     <!--显示企业相应的点位信息以供选择-->
     <el-table
-      v-if="this.formWorkForm.region !== 62"
+      v-if="this.formShow === true"
+      :height="tableHeight"
       :data="tableData"
       style="width: 100%">
       <el-table-column
@@ -147,19 +150,28 @@
           <el-input v-model="otherForm.majorRiskCategory"></el-input>
         </el-form-item>
         <el-form-item label="L：" prop="L">
-          <el-input v-model.number="otherForm.L"></el-input>
+          <el-input type="number" v-model.number="otherForm.L"></el-input>
         </el-form-item>
         <el-form-item label="E：" prop="E">
-          <el-input v-model.number="otherForm.E"></el-input>
+          <el-input type="number" v-model.number="otherForm.E"></el-input>
         </el-form-item>
         <el-form-item label="C：" prop="C">
-          <el-input v-model.number="otherForm.C"></el-input>
+          <el-input type="number" v-model.number="otherForm.C"></el-input>
         </el-form-item>
         <el-form-item label="R：" prop="R">
-          <el-input v-model.number="otherForm.R"></el-input>
-        </el-form-item>
-        <el-form-item label="风险等级：" prop="riskLevel">
+          <el-input type="number" v-model.number="otherForm.R"></el-input>
+        </el-form-item >
+        <!--<el-form-item label="风险等级：" prop="riskLevel">
           <el-input v-model="otherForm.riskLevel"></el-input>
+        </el-form-item>-->
+        <el-form-item label="风险等级：" prop="riskLevel">
+        <el-select v-model="otherForm.riskLevel" placeholder="请选择风险等级" style="width: 100%">
+          <el-option label="重大风险" value="重大风险"></el-option>
+          <el-option label="较大风险" value="较大风险"></el-option>
+          <el-option label="一般风险" value="一般风险"></el-option>
+          <el-option label="低风险" value="低风险"></el-option>
+          <el-option label="可接受" value="可接受"></el-option>
+        </el-select>
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="otherSubmitForm('otherForm')">录入</el-button>
@@ -174,49 +186,49 @@
             label="评估类别"
             width="150">
             <template slot-scope="scope">
-              <span style="margin-left: 10px">{{ scope.row.valuationCategory }}</span>
+              <span >{{ scope.row.valuationCategory }}</span>
             </template>
           </el-table-column>
           <el-table-column
             label="主要风险类别"
             width="120">
             <template slot-scope="scope">
-              <span style="margin-left: 10px">{{ scope.row.majorRiskCategory }}</span>
+              <span >{{ scope.row.majorRiskCategory }}</span>
             </template>
           </el-table-column>
           <el-table-column
             label="L"
             width="60">
             <template slot-scope="scope">
-              <span style="margin-left: 10px">{{ scope.row.L }}</span>
+              <span >{{ scope.row.judgeL }}</span>
             </template>
           </el-table-column>
           <el-table-column
             label="E"
             width="60">
             <template slot-scope="scope">
-              <span style="margin-left: 10px">{{ scope.row.E }}</span>
+              <span >{{ scope.row.judgeE }}</span>
             </template>
           </el-table-column>
           <el-table-column
             label="C"
             width="60">
             <template slot-scope="scope">
-              <span style="margin-left: 10px">{{ scope.row.C }}</span>
+              <span >{{ scope.row.judgeC }}</span>
             </template>
           </el-table-column>
           <el-table-column
             label="R"
-            width="60">
+            width="70">
             <template slot-scope="scope">
-              <span style="margin-left: 10px">{{ scope.row.R }}</span>
+              <span >{{ scope.row.judgeR }}</span>
             </template>
           </el-table-column>
           <el-table-column
             label="风险等级"
             width="90">
             <template slot-scope="scope">
-              <span style="margin-left: 10px">{{ scope.row.majorRiskCategory }}</span>
+              <span >{{ scope.row.riskLevel }}</span>
             </template>
           </el-table-column>
           <el-table-column label="操作">
@@ -231,7 +243,7 @@
         </el-table>
       </div>
     </div>
-    <el-dialog :title="checkBoxForm.list.influenceFactor" :visible.sync="insertInfluenceFactorDialogFormVisible">
+    <el-dialog :title="checkBoxForm.list.influenceFactor" :visible.sync="insertInfluenceFactorDialogFormVisible" width="70%">
       <el-form :model="checkBoxForm" :rules="rules">
         <el-form-item>
           <el-checkbox-group v-model="checkBoxForm.type">
@@ -256,6 +268,31 @@
         </el-form-item>
       </el-form>
     </el-dialog>
+    <!--其他信息录入-->
+    <el-dialog title="企业信息" :visible.sync="otherDialogFormVisible" :before-close="handleClose">
+      <!--录入企业信息-->
+      <el-form :model="otherEnterpriseForm" ref="otherEnterpriseForm" :rules="rules" size="mini" >
+        <el-form-item label="单位名称" :label-width="formLabelWidth" prop="otherCompanyName">
+          <el-input v-model="otherEnterpriseForm.otherCompanyName" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="主要负责人" :label-width="formLabelWidth">
+          <el-input v-model="otherEnterpriseForm.otherPrincipal" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="电话" :label-width="formLabelWidth">
+          <el-input v-model="otherEnterpriseForm.otherNumber" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="经度" :label-width="formLabelWidth">
+          <el-input v-model="otherEnterpriseForm.otherLng" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="纬度" :label-width="formLabelWidth">
+          <el-input v-model="otherEnterpriseForm.otherLat" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item>
+          <el-button @click="otherDialogFormVisible = false">取 消</el-button>
+          <el-button type="primary" @click="otherFormDialogFormVisible('otherEnterpriseForm')">确 定</el-button>
+        </el-form-item>
+      </el-form>
+    </el-dialog>
   </div>
 </template>
 
@@ -263,7 +300,20 @@
 export default {
   data () {
     return {
-      // 其他模板那表单
+      tableHeight: window.innerHeight - 103,
+      // 其他企业的相关信息
+      otherEnterpriseId: '',
+      formShow: true,
+      otherDialogFormVisible: false,
+      otherEnterpriseForm: {
+        otherCompanyName: '',
+        otherPrincipal: '',
+        otherNumber: '',
+        otherLng: '',
+        otherLat: ''
+      },
+      // 其他模板表单
+      otherFormData: {},
       otherForm: {
         valuationCategory: '',
         majorRiskCategory: '',
@@ -357,7 +407,10 @@ export default {
           {type: 'number', message: 'R必须为数字值'}
         ],
         riskLevel: [
-          {required: true, message: '风险等级不能为空'}
+          { required: true, message: '请选择风险等级', trigger: 'change' }
+        ],
+        otherCompanyName: [
+          {required: true, message: '单位名称不能为空'}
         ]
       }
     }
@@ -368,6 +421,46 @@ export default {
   watch: {
   },
   methods: {
+    // 录入其他信息按钮
+    upOtherDialogFormVisible () {
+      // 关闭弹窗
+      this.otherDialogFormVisible = true
+      // 把模板的方式录入的table设为false进行关闭，把其他录入显示出来
+      this.formShow = false
+      // 把企业id置未空
+      this.otherEnterpriseId = ''
+      // 把其他录入成功进行数据展示的table清空
+      this.otherTableData = []
+      // 把文档上传的数据置为空
+      this.wordFileList = []
+      // 把其他企业信息表单置空
+      this.otherEnterpriseForm = {}
+      // 把其他企业详细信息置空
+      this.otherForm = {}
+    },
+    // 保存其他企业信息
+    otherFormDialogFormVisible (formName) {
+      this.$refs[formName].validate(async (valid) => {
+        if (valid) {
+          const {data: res} = await this.$http.post('/save/other/enterprise', {
+            'otherCompanyName': this.otherEnterpriseForm.otherCompanyName,
+            'otherPrincipal': this.otherEnterpriseForm.otherPrincipal,
+            'otherNumber': this.otherEnterpriseForm.otherNumber,
+            'otherLng': this.otherEnterpriseForm.otherLng,
+            'otherLat': this.otherEnterpriseForm.otherLat
+          })
+          if (res.result === 'SUCCESS') {
+            this.otherEnterpriseId = res.data
+            this.$message.success('录入成功！')
+            this.otherDialogFormVisible = false
+          } else {
+            this.$message.error('录入失败！请重新录入')
+          }
+        } else {
+          return false
+        }
+      })
+    },
     handleClose (done) {
       if (this.enterpriseId === '') {
         done()
@@ -375,13 +468,13 @@ export default {
         this.$message.error('窗口不能被关闭，请检查模板是否已确认')
       }
     },
-    // 其他模板上传
+    // 其他企业详细信息上传
     otherSubmitForm (formName) {
       this.$refs[formName].validate(async (valid) => {
         if (valid) {
-          if (this.enterpriseId !== '') {
+          if (this.otherEnterpriseId !== '') {
             const {data: res} = await this.$http.post('/save/other/influence/details', {
-              enterpriseId: this.enterpriseId,
+              otherEnterpriseId: this.otherEnterpriseId,
               valuationCategory: this.otherForm.valuationCategory,
               majorRiskCategory: this.otherForm.majorRiskCategory,
               judgeL: this.otherForm.L,
@@ -392,10 +485,10 @@ export default {
             })
             if (res.result === 'SUCCESS') {
               this.$message.success('录入成功')
-              this.otherTableData.push(this.otherForm)
+              this.otherTableData.push(res.data)
             }
           } else {
-            this.$message.error('请录入企业信息再进行录入')
+            this.$message.error('请录入其他企业信息再进行录入')
           }
         } else {
           this.$message.warning('请输入后在点击录入')
@@ -403,33 +496,49 @@ export default {
         }
       })
     },
+    // 其他表企业的表单重置清除表单
     otherResetForm (formName) {
       this.$refs[formName].resetFields()
     },
-    // word文档上春
+    // word文档上传
     async wordHandleSuccess (response) {
       if (response.result === 'SUCCESS') {
-        const {data: res} = await this.$http.post('/save/word/url', {
-          enterpriseId: this.enterpriseId,
-          wordUrl: response.data
-        })
-        if (res.result === 'SUCCESS') {
-          this.$message.success('上传成功')
-        } else {
-          this.$message.error('上传失败！请重新上传')
+        if (this.enterpriseId !== '') {
+          const {data: res} = await this.$http.post('/save/word/url', {
+            enterpriseId: this.enterpriseId,
+            wordUrl: response.data
+          })
+          if (res.result === 'SUCCESS') {
+            this.$message.success('上传成功')
+          } else {
+            this.$message.error('上传失败！请重新上传')
+          }
+        } else if (this.otherEnterpriseId !== '') {
+          const {data: res} = await this.$http.post('/save/other/word/url', {
+            otherEnterpriseId: this.otherEnterpriseId,
+            otherWordUrl: response.data
+          })
+          if (res.result === 'SUCCESS') {
+            this.$message.success('上传成功')
+          } else {
+            this.$message.error('上传失败！请重新上传')
+          }
         }
       } else {
         this.$message.error('上传失败！请重新上传')
       }
     },
+    otherSubmitUpload () {
+      this.$refs.upload.submit()
+      console.log(this.wordFileList)
+      if (this.wordFileList.length > 0) {
+        this.$message.warning('相应文档已上传！')
+      }
+    },
     submitUpload () {
-      if (this.enterpriseId !== '') {
-        this.$refs.upload.submit()
-        if (this.wordFileList.length > 0) {
-          this.$message.warning('相应文档已上传！')
-        }
-      } else {
-        this.$message.error('请录入企业信息后再上传')
+      this.$refs.upload.submit()
+      if (this.wordFileList.length > 0) {
+        this.$message.warning('相应文档已上传！')
       }
     },
     wordHandlePreview (file) {
@@ -464,7 +573,7 @@ export default {
           // 把拼装好的图片地址的最后一个逗号去掉
           if (photoStr.length > 0) photoStr = photoStr.substr(0, photoStr.length - 1)
           // 把风险详情添加到数组里
-          this.influenceFactorDetails.push({'enterpriseId': this.enterpriseId, 'categoryId': this.checkBoxForm.list.categoryId, 'determineFactor': item, 'score': score, 'photo': photoStr})
+          this.influenceFactorDetails.push({'enterpriseId': this.enterpriseId, 'categoryId': this.checkBoxForm.list.categoryId, 'influenceFactor': this.checkBoxForm.list.influenceFactor, 'determineFactor': item, 'score': score, 'photo': photoStr})
         })
         // 把风险详情添加到数组里发送给后台
         const {data: res} = await this.$http.post('/save/influence/factor/details', {
@@ -612,6 +721,9 @@ export default {
               this.enterpriseId = ''
               // 把其他模板展示的table变为空
               this.otherTableData = []
+              this.formShow = true
+              // 其他企业设为空，避免上传按钮显示
+              this.otherEnterpriseId = ''
             } else {
               this.$message({
                 type: 'error',
@@ -646,6 +758,7 @@ export default {
 .enterprise-css{
   display: flex;
   justify-content: space-between;
+  margin: 1px;
 }
 .select-button{
 display: flex;
@@ -665,6 +778,7 @@ display: flex;
 }
 .other-css{
   display: flex;
+  margin-top: 10px;
 }
 .box-card{
   width: 43.3%;

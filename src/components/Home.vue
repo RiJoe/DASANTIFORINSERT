@@ -3,7 +3,7 @@
     <el-header>
       <div class="home-header">
         <img src="../assets/003.jpg" alt="" @click="imageToHome">
-        企业风险录入系统
+        企业风险点位评估系统
       </div>
       <div>
         <el-button type="info" @click="logOut">退出</el-button>
@@ -11,7 +11,8 @@
     </el-header>
     <el-container>
       <el-aside width="200px">
-        <el-menu router><el-menu-item index="/enterpriseInformation">
+        <el-menu router :default-active="defaultUrl">
+          <el-menu-item index="/enterpriseInformation">
           <i class="el-icon-s-data"></i>
           <span slot="title">企业信息分析</span>
         </el-menu-item>
@@ -22,10 +23,6 @@
           <el-menu-item index="/insertEnterpriseDetails">
             <i class="el-icon-user-solid"></i>
             <span slot="title">企业信息录入</span>
-          </el-menu-item>
-          <el-menu-item index="/tableinsert">
-            <i class="el-icon-user-solid"></i>
-            <span slot="title">评估表模板录入</span>
           </el-menu-item>
         </el-menu>
       </el-aside>
@@ -40,9 +37,19 @@
 export default {
   data () {
     return {
+      defaultUrl: ''
     }
   },
+  watch: {
+    '$route': 'getPath'
+  },
+  mounted () {
+    this.defaultUrl = window.location.href.split('/#')[1]
+  },
   methods: {
+    getPath () {
+      this.defaultUrl = this.$route.path
+    },
     imageToHome () {
       this.$router.replace('/home')
     },
