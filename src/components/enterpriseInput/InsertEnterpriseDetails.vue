@@ -231,15 +231,6 @@
               <span >{{ scope.row.riskLevel }}</span>
             </template>
           </el-table-column>
-          <el-table-column label="操作">
-            <template slot-scope="scope">
-              <el-button
-                size="mini"
-                type="danger"
-                @click="handleDelete(scope.$index, scope.row)">修改
-              </el-button>
-            </template>
-          </el-table-column>
         </el-table>
       </div>
     </div>
@@ -423,6 +414,9 @@ export default {
   methods: {
     // 录入其他信息按钮
     upOtherDialogFormVisible () {
+      if (this.enterpriseId !== '') {
+        return this.$message.warning('请确定相关信息录完，再选择其他模板进行其他企业信息录入')
+      }
       // 关闭弹窗
       this.otherDialogFormVisible = true
       // 把模板的方式录入的table设为false进行关闭，把其他录入显示出来
@@ -462,11 +456,19 @@ export default {
       })
     },
     handleClose (done) {
+      this.$confirm('确认关闭？')
+        .then(_ => {
+          done()
+        })
+        .catch(_ => {
+        })
+      /*
       if (this.enterpriseId === '') {
         done()
       } else {
         this.$message.error('窗口不能被关闭，请检查模板是否已确认')
       }
+      */
     },
     // 其他企业详细信息上传
     otherSubmitForm (formName) {
@@ -696,6 +698,12 @@ export default {
             type: 'warning'
           }).then(async () => {
             // 通过模板id获取模板信息
+            if (this.formWorkForm.region === 101) {
+              this.formShow = false
+              this.dialogFormVisible = false
+              this.enterpriseId = ''
+              return this.$message.success('其他模板选择成功，请录入其他企业信息')
+            }
             const {data: res} = await this.$http.get('/get/table/by/id', {
               params: {
                 tableId: this.formWorkForm.region
